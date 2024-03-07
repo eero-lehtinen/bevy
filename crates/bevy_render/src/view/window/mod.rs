@@ -341,34 +341,26 @@ pub fn prepare_windows(
         let surface = &surface_data.surface;
         if not_already_configured || window.size_changed || window.present_mode_changed {
             render_device.configure_surface(surface, &surface_configuration);
-            let frame = surface
-                .get_current_texture()
-                .expect("Error configuring surface");
-            window.set_swapchain_texture(frame);
-        } else {
-            match surface.get_current_texture() {
-                Ok(frame) => {
-                    window.set_swapchain_texture(frame);
-                }
-                Err(wgpu::SurfaceError::Outdated) => {
-                    render_device.configure_surface(surface, &surface_configuration);
-                    let frame = surface
-                        .get_current_texture()
-                        .expect("Error reconfiguring surface");
-                    window.set_swapchain_texture(frame);
-                }
-                #[cfg(target_os = "linux")]
-                Err(wgpu::SurfaceError::Timeout) if may_erroneously_timeout() => {
-                    bevy_utils::tracing::trace!(
-                        "Couldn't get swap chain texture. This is probably a quirk \
-                        of your Linux GPU driver, so it can be safely ignored."
-                    );
-                }
-                Err(err) => {
-                    panic!("Couldn't get swap chain texture, operation unrecoverable: {err}");
-                }
+        }
+        match surface.get_current_texture() {
+            Ok(frame) => {
+                window.set_swapchain_texture(frame);
             }
-        };
+            Err(wgpu::SurfaceError::Outdated) => {
+                // Linux Nvidia 550 driver often returns outdated when resizing the window
+                continue;
+            }
+            #[cfg(target_os = "linux")]
+            Err(wgpu::SurfaceError::Timeout) if may_erroneously_timeout() => {
+                bevy_utils::tracing::trace!(
+                    "Couldn't get swap chain texture. This is probably a quirk \
+                        of your Linux GPU driver, so it can be safely ignored."
+                );
+            }
+            Err(err) => {
+                panic!("Couldn't get swap chain texture, operation unrecoverable: {err}");
+            }
+        }
         window.swap_chain_texture_format = Some(surface_data.format);
 
         if window.screenshot_func.is_some() {

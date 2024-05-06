@@ -118,7 +118,13 @@ impl SpecializedRenderPipeline for LineGizmoPipeline {
             }),
             layout,
             primitive: PrimitiveState::default(),
-            depth_stencil: None,
+            depth_stencil: Some(DepthStencilState {
+                format: TextureFormat::Depth24Plus,
+                depth_write_enabled: true,
+                depth_compare: CompareFunction::Greater,
+                stencil: StencilState::default(),
+                bias: DepthBiasState::default(),
+            }),
             multisample: MultisampleState {
                 count: key.mesh_key.msaa_samples(),
                 mask: !0,

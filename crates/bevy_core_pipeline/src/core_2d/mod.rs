@@ -32,19 +32,25 @@ pub use main_pass_2d_node::*;
 use bevy_app::{App, Plugin};
 use bevy_ecs::prelude::*;
 use bevy_render::{
-    camera::Camera,
+    camera::{Camera, ExtractedCamera},
     extract_component::ExtractComponentPlugin,
     render_graph::{EmptyNode, RenderGraphApp, ViewNodeRunner},
     render_phase::{
         sort_phase_system, CachedRenderPipelinePhaseItem, DrawFunctionId, DrawFunctions, PhaseItem,
         RenderPhase,
     },
-    render_resource::CachedRenderPipelineId,
+    render_resource::{
+        CachedRenderPipelineId, Extent3d, TextureDescriptor, TextureDimension, TextureFormat,
+        TextureUsages,
+    },
+    renderer::RenderDevice,
+    texture::TextureCache,
+    view::{Msaa, ViewDepthTexture},
     Extract, ExtractSchedule, Render, RenderApp, RenderSet,
 };
-use bevy_utils::{nonmax::NonMaxU32, FloatOrd};
+use bevy_utils::{nonmax::NonMaxU32, FloatOrd, HashMap};
 
-use crate::{tonemapping::TonemappingNode, upscaling::UpscalingNode};
+use crate::{prepass::DepthPrepass, tonemapping::TonemappingNode, upscaling::UpscalingNode};
 
 use self::graph::{Core2d, Node2d};
 
@@ -64,7 +70,10 @@ impl Plugin for Core2dPlugin {
             .add_systems(ExtractSchedule, extract_core_2d_camera_phases)
             .add_systems(
                 Render,
-                sort_phase_system::<Transparent2d>.in_set(RenderSet::PhaseSort),
+                (
+                    prepare_core_depth_textures.in_set(RenderSet::PrepareResources),
+                    sort_phase_system::<Transparent2d>.in_set(RenderSet::PhaseSort),
+                ),
             );
 
         render_app
@@ -82,6 +91,65 @@ impl Plugin for Core2dPlugin {
                     Node2d::Upscaling,
                 ),
             );
+    }
+}
+
+pub fn prepare_core_depth_textures(
+    mut commands: Commands,
+    mut texture_cache: ResMut<TextureCache>,
+    msaa: Res<Msaa>,
+    render_device: Res<RenderDevice>,
+    views_3d: Query<(Entity, &ExtractedCamera), With<RenderPhase<Transparent2d>>>,
+) {
+    let mut render_target_usage = HashMap::default();
+
+    for (_, camera) in &views_3d {
+        // Default usage required to write to the depth texture
+        let usage: TextureUsages = TextureUsages::RENDER_ATTACHMENT;
+        render_target_usage
+            .entry(camera.target.clone())
+            .and_modify(|u| *u |= usage)
+            .or_insert_with(|| usage);
+    }
+
+    let mut textures = HashMap::default();
+    for (entity, camera) in &views_3d {
+        let Some(physical_target_size) = camera.physical_target_size else {
+            continue;
+        };
+
+        let cached_texture = textures
+            .entry(camera.target.clone())
+            .or_insert_with(|| {
+                // The size of the depth texture
+                let size = Extent3d {
+                    depth_or_array_layers: 1,
+                    width: physical_target_size.x,
+                    height: physical_target_size.y,
+                };
+
+                let usage = *render_target_usage
+                    .get(&camera.target.clone())
+                    .expect("The depth texture usage should already exist for this target");
+
+                let descriptor = TextureDescriptor {
+                    label: Some("view_depth_texture"),
+                    size,
+                    mip_level_count: 1,
+                    sample_count: msaa.samples(),
+                    dimension: TextureDimension::D2,
+                    format: TextureFormat::Depth24Plus,
+                    usage,
+                    view_formats: &[],
+                };
+
+                texture_cache.get(&render_device, descriptor)
+            })
+            .clone();
+
+        commands
+            .entity(entity)
+            .insert(ViewDepthTexture::new(cached_texture, Some(0.)));
     }
 }
 

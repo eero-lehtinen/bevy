@@ -101,17 +101,6 @@ pub fn prepare_core_depth_textures(
     render_device: Res<RenderDevice>,
     views_3d: Query<(Entity, &ExtractedCamera), With<RenderPhase<Transparent2d>>>,
 ) {
-    let mut render_target_usage = HashMap::default();
-
-    for (_, camera) in &views_3d {
-        // Default usage required to write to the depth texture
-        let usage: TextureUsages = TextureUsages::RENDER_ATTACHMENT;
-        render_target_usage
-            .entry(camera.target.clone())
-            .and_modify(|u| *u |= usage)
-            .or_insert_with(|| usage);
-    }
-
     let mut textures = HashMap::default();
     for (entity, camera) in &views_3d {
         let Some(physical_target_size) = camera.physical_target_size else {
@@ -128,10 +117,6 @@ pub fn prepare_core_depth_textures(
                     height: physical_target_size.y,
                 };
 
-                let usage = *render_target_usage
-                    .get(&camera.target.clone())
-                    .expect("The depth texture usage should already exist for this target");
-
                 let descriptor = TextureDescriptor {
                     label: Some("view_depth_texture"),
                     size,
@@ -139,7 +124,7 @@ pub fn prepare_core_depth_textures(
                     sample_count: msaa.samples(),
                     dimension: TextureDimension::D2,
                     format: TextureFormat::Depth24Plus,
-                    usage,
+                    usage: TextureUsages::RENDER_ATTACHMENT,
                     view_formats: &[],
                 };
 

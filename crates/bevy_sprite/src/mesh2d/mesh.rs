@@ -553,7 +553,7 @@ impl SpecializedMeshPipeline for Mesh2dPipeline {
             depth_stencil: Some(DepthStencilState {
                 format: TextureFormat::Depth24Plus,
                 depth_write_enabled: true,
-                depth_compare: CompareFunction::Greater,
+                depth_compare: CompareFunction::GreaterEqual,
                 stencil: StencilState::default(),
                 bias: DepthBiasState::default(),
             }),

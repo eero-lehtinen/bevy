@@ -1,6 +1,6 @@
 use crate::{
     extract_resource::ExtractResource,
-    prelude::Shader,
+    prelude::{Color, Shader},
     render_resource::{ShaderType, UniformBuffer},
     renderer::{RenderDevice, RenderQueue},
     Extract, ExtractSchedule, Render, RenderApp, RenderSet,
@@ -9,6 +9,7 @@ use bevy_app::{App, Plugin};
 use bevy_asset::{load_internal_asset, Handle};
 use bevy_core::FrameCount;
 use bevy_ecs::prelude::*;
+use bevy_math::{Vec2, Vec3};
 use bevy_reflect::Reflect;
 use bevy_time::Time;
 
@@ -55,9 +56,9 @@ pub struct GlobalsUniform {
     /// Frame count since the start of the app.
     /// It wraps to zero when it reaches the maximum value of a u32.
     frame_count: u32,
-    /// WebGL2 structs must be 16 byte aligned.
-    #[cfg(all(feature = "webgl", target_arch = "wasm32", not(feature = "webgpu")))]
-    _wasm_padding: f32,
+    pub shadow_color: Color,
+    pub shadow_dir: Vec3,
+    pub shadow_mult: Vec2,
 }
 
 /// The buffer containing the [`GlobalsUniform`]
@@ -66,7 +67,7 @@ pub struct GlobalsBuffer {
     pub buffer: UniformBuffer<GlobalsUniform>,
 }
 
-fn prepare_globals_buffer(
+pub fn prepare_globals_buffer(
     render_device: Res<RenderDevice>,
     render_queue: Res<RenderQueue>,
     mut globals_buffer: ResMut<GlobalsBuffer>,

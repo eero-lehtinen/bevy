@@ -1,6 +1,7 @@
 mod render_layers;
 
 use bevy_derive::Deref;
+use bevy_math::{Affine3A, Mat3A, Vec2};
 pub use render_layers::*;
 
 use bevy_app::{Plugin, PostUpdate};
@@ -10,6 +11,7 @@ use bevy_hierarchy::{Children, Parent};
 use bevy_reflect::{std_traits::ReflectDefault, Reflect};
 use bevy_transform::{components::GlobalTransform, TransformSystem};
 use std::cell::Cell;
+use std::f32::consts::{PI, SQRT_2};
 use thread_local::ThreadLocal;
 
 use crate::deterministic::DeterministicRenderingConfig;
@@ -158,6 +160,10 @@ pub struct VisibilityBundle {
 #[derive(Component, Default, Reflect)]
 #[reflect(Component, Default)]
 pub struct NoFrustumCulling;
+
+#[derive(Component, Default, Reflect)]
+#[reflect(Component, Default)]
+pub struct TiltedFrustumCulling;
 
 /// Collection of entities visible from the current view.
 ///
@@ -387,6 +393,7 @@ pub fn check_visibility(
         Option<&Aabb>,
         &GlobalTransform,
         Has<NoFrustumCulling>,
+        Has<TiltedFrustumCulling>,
     )>,
     deterministic_rendering_config: Res<DeterministicRenderingConfig>,
 ) {
@@ -407,6 +414,7 @@ pub fn check_visibility(
                 maybe_model_aabb,
                 transform,
                 no_frustum_culling,
+                tilted_frustum_culling,
             ) = query_item;
 
             // Skip computing visibility for entities that are configured to be hidden.
@@ -423,7 +431,16 @@ pub fn check_visibility(
             // If we have an aabb, do frustum culling
             if !no_frustum_culling {
                 if let Some(model_aabb) = maybe_model_aabb {
-                    let model = transform.affine();
+                    let model = if tilted_frustum_culling {
+                        let mut model = transform.affine();
+                        model.translation.y += model.translation.z - 20.;
+                        model.matrix3 *= Mat3A::from_scale(Vec2::new(1., SQRT_2))
+                            * Mat3A::from_rotation_x(-PI / 4.);
+                        model
+                    } else {
+                        transform.affine()
+                    };
+
                     let model_sphere = Sphere {
                         center: model.transform_point3a(model_aabb.center),
                         radius: transform.radius_vec3a(model_aabb.half_extents),

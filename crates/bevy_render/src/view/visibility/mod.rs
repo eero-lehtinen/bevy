@@ -431,15 +431,10 @@ pub fn check_visibility(
             // If we have an aabb, do frustum culling
             if !no_frustum_culling {
                 if let Some(model_aabb) = maybe_model_aabb {
-                    let model = if tilted_frustum_culling {
-                        let mut model = transform.affine();
+                    let mut model = transform.affine();
+                    if tilted_frustum_culling {
                         model.translation.y += model.translation.z - 20.;
-                        model.matrix3 *= Mat3A::from_scale(Vec2::new(1., SQRT_2))
-                            * Mat3A::from_rotation_x(-PI / 4.);
-                        model
-                    } else {
-                        transform.affine()
-                    };
+                    }
 
                     let model_sphere = Sphere {
                         center: model.transform_point3a(model_aabb.center),

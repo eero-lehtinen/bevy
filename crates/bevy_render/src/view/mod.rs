@@ -547,7 +547,7 @@ pub struct GpuCulling;
 pub struct NoCpuCulling;
 
 impl ViewTarget {
-    pub const TEXTURE_FORMAT_HDR: TextureFormat = TextureFormat::Rgba16Float;
+    pub const TEXTURE_FORMAT_HDR: TextureFormat = TextureFormat::Rg11b10Float;
 
     /// Retrieve this target's main texture's color attachment.
     pub fn get_color_attachment(&self) -> RenderPassColorAttachment {

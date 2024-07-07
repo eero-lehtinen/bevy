@@ -590,6 +590,18 @@ category = "2D Rendering"
 wasm = true
 
 [[example]]
+name = "mesh2d_transforms"
+path = "examples/2d/mesh2d_transforms.rs"
+doc-scrape-examples = true
+
+[package.metadata.example.mesh2d_transforms]
+name = "Mesh2d Transforms"
+description = "Used to test transforms with mesh2d"
+category = "2D Rendering"
+wasm = true
+
+
+[[example]]
 name = "pixel_grid_snap"
 path = "examples/2d/pixel_grid_snap.rs"
 doc-scrape-examples = true
@@ -3064,6 +3076,17 @@ description = "Demonstrates how to sample random points from mathematical primit
 category = "Math"
 wasm = true
 
+[[example]]
+name = "smooth_follow"
+path = "examples/math/smooth_follow.rs"
+doc-scrape-examples = true
+
+[package.metadata.example.smooth_follow]
+name = "Smooth Follow"
+description = "Demonstrates how to make an entity smoothly follow another using interpolation"
+category = "Math"
+wasm = true
+
 # Gizmos
 [[example]]
 name = "2d_gizmos"
@@ -3123,17 +3146,6 @@ doc-scrape-examples = true
 [package.metadata.example.2d_top_down_camera]
 name = "2D top-down camera"
 description = "A 2D top-down camera smoothly following player movements"
-category = "Camera"
-wasm = true
-
-[[example]]
-name = "first_person_view_model"
-path = "examples/camera/first_person_view_model.rs"
-doc-scrape-examples = true
-
-[package.metadata.example.first_person_view_model]
-name = "First person view model"
-description = "A first-person camera that uses a world model and a view model with different field of views (FOV)"
 category = "Camera"
 wasm = true
 

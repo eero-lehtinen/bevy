@@ -142,7 +142,7 @@ impl SpecializedRenderPipeline for LineGizmoPipeline {
             depth_stencil: Some(DepthStencilState {
                 format: CORE_2D_DEPTH_FORMAT,
                 depth_write_enabled: false,
-                depth_compare: CompareFunction::LessEqual,
+                depth_compare: CompareFunction::Always,
                 stencil: StencilState {
                     front: StencilFaceState::IGNORE,
                     back: StencilFaceState::IGNORE,

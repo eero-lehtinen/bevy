@@ -294,24 +294,12 @@ impl SpecializedRenderPipeline for SpritePipeline {
                 topology: PrimitiveTopology::TriangleList,
                 strip_index_format: None,
             },
-            // Sprites are always alpha blended so they never need to write to depth.
-            // They just need to read it in case an opaque mesh2d
-            // that wrote to depth is present.
             depth_stencil: Some(DepthStencilState {
                 format: CORE_2D_DEPTH_FORMAT,
-                depth_write_enabled: false,
+                depth_write_enabled: true,
                 depth_compare: CompareFunction::GreaterEqual,
-                stencil: StencilState {
-                    front: StencilFaceState::IGNORE,
-                    back: StencilFaceState::IGNORE,
-                    read_mask: 0,
-                    write_mask: 0,
-                },
-                bias: DepthBiasState {
-                    constant: 0,
-                    slope_scale: 0.0,
-                    clamp: 0.0,
-                },
+                stencil: StencilState::default(),
+                bias: DepthBiasState::default(),
             }),
             multisample: MultisampleState {
                 count: key.msaa_samples(),

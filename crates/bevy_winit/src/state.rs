@@ -401,6 +401,10 @@ impl<T: Event> ApplicationHandler<T> for WinitAppRunnerState<T> {
     }
 
     fn about_to_wait(&mut self, event_loop: &ActiveEventLoop) {
+        if self.lifecycle == AppLifecycle::Suspended {
+            return;
+        }
+
         // create any new windows
         // (even if app did not update, some may have been created by plugin setup)
         let mut create_window =
@@ -429,25 +433,6 @@ impl<T: Event> ApplicationHandler<T> for WinitAppRunnerState<T> {
             self.startup_forced_updates -= 1;
             // Ensure that an update is triggered on the first iterations for app initialization
             should_update = true;
-        }
-
-        if self.lifecycle == AppLifecycle::WillSuspend {
-            self.lifecycle = AppLifecycle::Suspended;
-            // Trigger one last update to enter the suspended state
-            should_update = true;
-
-            #[cfg(target_os = "android")]
-            {
-                // Remove the `RawHandleWrapper` from the primary window.
-                // This will trigger the surface destruction.
-                let mut query = self
-                    .world_mut()
-                    .query_filtered::<Entity, With<PrimaryWindow>>();
-                let entity = query.single(&self.world());
-                self.world_mut()
-                    .entity_mut(entity)
-                    .remove::<RawHandleWrapper>();
-            }
         }
 
         if self.lifecycle == AppLifecycle::WillResume {
@@ -591,7 +576,23 @@ impl<T: Event> ApplicationHandler<T> for WinitAppRunnerState<T> {
     fn suspended(&mut self, _event_loop: &ActiveEventLoop) {
         // Mark the state as `WillSuspend`. This will let the schedule run one last time
         // before actually suspending to let the application react
-        self.lifecycle = AppLifecycle::WillSuspend;
+        self.lifecycle = AppLifecycle::Suspended;
+        self.winit_events.send(self.lifecycle);
+        // Trigger one last update to enter the suspended state
+        self.run_app_update();
+
+        #[cfg(target_os = "android")]
+        {
+            // Remove the `RawHandleWrapper` from the primary window.
+            // This will trigger the surface destruction.
+            let mut query = self
+                .world_mut()
+                .query_filtered::<Entity, With<PrimaryWindow>>();
+            let entity = query.single(&self.world());
+            self.world_mut()
+                .entity_mut(entity)
+                .remove::<RawHandleWrapper>();
+        }
     }
 
     fn exiting(&mut self, _event_loop: &ActiveEventLoop) {

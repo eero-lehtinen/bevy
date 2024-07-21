@@ -90,6 +90,9 @@ impl AnimationTransitions {
             }
         }
 
+        self.transitions
+            .retain(|transition| transition.animation != new_animation);
+
         self.main_animation = Some(new_animation);
         player.start(new_animation)
     }

@@ -383,6 +383,10 @@ fn reset_view_visibility(mut query: Query<&mut ViewVisibility>) {
     });
 }
 
+#[derive(Component, Default, Reflect)]
+#[reflect(Component, Default)]
+pub struct TiltedFrustumCulling;
+
 /// System updating the visibility of entities each frame.
 ///
 /// The system is part of the [`VisibilitySystems::CheckVisibility`] set. Each
@@ -413,6 +417,7 @@ pub fn check_visibility<QF>(
             &GlobalTransform,
             Has<NoFrustumCulling>,
             Has<VisibilityRange>,
+            Has<TiltedFrustumCulling>,
         ),
         QF,
     >,
@@ -443,6 +448,7 @@ pub fn check_visibility<QF>(
                     transform,
                     no_frustum_culling,
                     has_visibility_range,
+                    tilted_frustum_culling,
                 ) = query_item;
 
                 // Skip computing visibility for entities that are configured to be hidden.
@@ -468,7 +474,11 @@ pub fn check_visibility<QF>(
                 // If we have an aabb, do frustum culling
                 if !no_frustum_culling && !no_cpu_culling {
                     if let Some(model_aabb) = maybe_model_aabb {
-                        let world_from_local = transform.affine();
+                        let mut world_from_local = transform.affine();
+                        if tilted_frustum_culling {
+                            world_from_local.translation.y += world_from_local.translation.z;
+                        }
+
                         let model_sphere = Sphere {
                             center: world_from_local.transform_point3a(model_aabb.center),
                             radius: transform.radius_vec3a(model_aabb.half_extents),

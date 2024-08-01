@@ -16,7 +16,7 @@ use crate::{
 };
 
 /// A wrapper around a [`cosmic_text::FontSystem`]
-struct CosmicFontSystem(cosmic_text::FontSystem);
+pub struct CosmicFontSystem(pub cosmic_text::FontSystem);
 
 impl Default for CosmicFontSystem {
     fn default() -> Self {
@@ -28,7 +28,7 @@ impl Default for CosmicFontSystem {
 }
 
 /// A wrapper around a [`cosmic_text::SwashCache`]
-struct SwashCache(cosmic_text::SwashCache);
+pub struct SwashCache(pub cosmic_text::SwashCache);
 
 impl Default for SwashCache {
     fn default() -> Self {
@@ -42,15 +42,15 @@ impl Default for SwashCache {
 #[derive(Default, Resource)]
 pub struct TextPipeline {
     /// Identifies a font [`ID`](cosmic_text::fontdb::ID) by its [`Font`] [`Asset`](bevy_asset::Asset).
-    map_handle_to_font_id: HashMap<AssetId<Font>, (cosmic_text::fontdb::ID, String)>,
+    pub map_handle_to_font_id: HashMap<AssetId<Font>, (cosmic_text::fontdb::ID, String)>,
     /// The font system is used to retrieve fonts and their information, including glyph outlines.
     ///
     /// See [`cosmic_text::FontSystem`] for more information.
-    font_system: CosmicFontSystem,
+    pub font_system: CosmicFontSystem,
     /// The swash cache rasterizer is used to rasterize glyphs
     ///
     /// See [`cosmic_text::SwashCache`] for more information.
-    swash_cache: SwashCache,
+    pub swash_cache: SwashCache,
 }
 
 impl TextPipeline {

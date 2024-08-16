@@ -339,8 +339,8 @@ fn approx_round_ties_up(value: f32) -> f32 {
 /// - `round_ties_up`: width is 100 (rounds to -50 and 50).
 fn approx_round_layout_coords(value: Vec2) -> Vec2 {
     Vec2 {
-        x: approx_round_ties_up(value.x),
-        y: approx_round_ties_up(value.y),
+        x: value.x,
+        y: value.y,
     }
 }
 

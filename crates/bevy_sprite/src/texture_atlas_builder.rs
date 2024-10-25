@@ -50,7 +50,7 @@ impl Default for TextureAtlasBuilder<'_> {
             textures_to_place: Vec::new(),
             initial_size: UVec2::splat(256),
             max_size: UVec2::splat(2048),
-            format: TextureFormat::Rgba8UnormSrgb,
+            format: TextureFormat::Rgba8Unorm,
             auto_format_conversion: true,
             padding: UVec2::ZERO,
         }

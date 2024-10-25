@@ -73,7 +73,7 @@ pub struct ExtractedWindow {
 impl ExtractedWindow {
     fn set_swapchain_texture(&mut self, frame: wgpu::SurfaceTexture) {
         let texture_view_descriptor = TextureViewDescriptor {
-            format: Some(frame.texture.format().add_srgb_suffix()),
+            format: Some(frame.texture.format().remove_srgb_suffix()),
             ..default()
         };
         self.swap_chain_texture_view = Some(TextureView::from(
@@ -367,8 +367,10 @@ pub fn create_surfaces(
                 let mut format = *formats.first().expect("No supported formats for surface");
                 for available_format in formats {
                     // Rgba8UnormSrgb and Bgra8UnormSrgb and the only sRGB formats wgpu exposes that we can use for surfaces.
-                    if available_format == TextureFormat::Rgba8UnormSrgb
-                        || available_format == TextureFormat::Bgra8UnormSrgb
+                    // if available_format == TextureFormat::Rgba8UnormSrgb
+                    //     || available_format == TextureFormat::Bgra8UnormSrgb
+                    if available_format == TextureFormat::Rgba8Unorm
+                        || available_format == TextureFormat::Bgra8Unorm
                     {
                         format = available_format;
                         break;
@@ -403,11 +405,7 @@ pub fn create_surfaces(
                         }
                         CompositeAlphaMode::Inherit => wgpu::CompositeAlphaMode::Inherit,
                     },
-                    view_formats: if !format.is_srgb() {
-                        vec![format.add_srgb_suffix()]
-                    } else {
-                        vec![]
-                    },
+                    view_formats: vec![format.remove_srgb_suffix()],
                 };
 
                 render_device.configure_surface(&surface, &configuration);

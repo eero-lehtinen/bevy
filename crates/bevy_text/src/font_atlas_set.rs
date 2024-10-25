@@ -268,7 +268,7 @@ impl FontAtlasSet {
                 },
                 TextureDimension::D2,
                 data,
-                TextureFormat::Rgba8UnormSrgb,
+                TextureFormat::Rgba8Unorm,
                 RenderAssetUsages::MAIN_WORLD,
             ),
             IVec2::new(left, top),

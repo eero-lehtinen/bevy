@@ -831,7 +831,7 @@ pub fn prepare_view_attachments(
                     .cloned()
                     .zip(target.get_texture_format(&windows, &images, &manual_texture_views))
                     .map(|(view, format)| {
-                        OutputColorAttachment::new(view.clone(), format.add_srgb_suffix())
+                        OutputColorAttachment::new(view.clone(), format.remove_srgb_suffix())
                     })
                 else {
                     continue;
@@ -902,8 +902,12 @@ pub fn prepare_view_targets(
                     format: main_texture_format,
                     usage: texture_usage.0,
                     view_formats: match main_texture_format {
-                        TextureFormat::Bgra8Unorm => &[TextureFormat::Bgra8UnormSrgb],
-                        TextureFormat::Rgba8Unorm => &[TextureFormat::Rgba8UnormSrgb],
+                        // TextureFormat::Rgba8UnormSrgb => &[TextureFormat::Rgba8UnormSrgb],
+                        // TextureFormat::Bgra8UnormSrgb => &[TextureFormat::Bgra8UnormSrgb],
+                        // TextureFormat::Bgra8Unorm => &[TextureFormat::Bgra8UnormSrgb],
+                        // TextureFormat::Rgba8Unorm => &[TextureFormat::Rgba8UnormSrgb],
+                        TextureFormat::Bgra8Unorm => &[TextureFormat::Bgra8Unorm],
+                        TextureFormat::Rgba8Unorm => &[TextureFormat::Rgba8Unorm],
                         _ => &[],
                     },
                 };

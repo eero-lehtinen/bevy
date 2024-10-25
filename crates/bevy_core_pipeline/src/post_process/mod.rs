@@ -210,7 +210,7 @@ impl Plugin for PostProcessingPlugin {
                 },
                 TextureDimension::D2,
                 DEFAULT_CHROMATIC_ABERRATION_LUT_DATA.to_vec(),
-                TextureFormat::Rgba8UnormSrgb,
+                TextureFormat::Rgba8Unorm,
                 RenderAssetUsages::RENDER_WORLD,
             ),
         );

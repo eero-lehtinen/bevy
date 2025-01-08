@@ -61,8 +61,10 @@ pub struct GlobalsUniform {
     pub shadow_color: LinearRgba,
     pub shadow_dir: Vec3,
     pub shadow_mult: Vec2,
-    pub specular_color: LinearRgba,
+    pub light_color: LinearRgba,
+    pub secondary_light_color: LinearRgba,
     pub ambient_color: LinearRgba,
+    pub specular_color: LinearRgba,
 }
 
 /// The buffer containing the [`GlobalsUniform`]

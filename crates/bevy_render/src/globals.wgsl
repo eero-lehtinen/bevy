@@ -14,6 +14,8 @@ struct Globals {
     shadow_dir: vec3<f32>,
     shadow_mult: vec2<f32>,
 
-    specular_color: vec4<f32>,
+    light_color: vec4<f32>,
+    secondary_light_color: vec4<f32>,
     ambient_color: vec4<f32>,
+    specular_color: vec4<f32>,
 };

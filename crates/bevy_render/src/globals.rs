@@ -58,13 +58,9 @@ pub struct GlobalsUniform {
     /// It wraps to zero when it reaches the maximum value of a u32.
     frame_count: u32,
 
-    pub shadow_color: LinearRgba,
-    pub shadow_dir: Vec3,
-    pub shadow_mult: Vec2,
     pub light_color: LinearRgba,
-    pub secondary_light_color: LinearRgba,
-    pub ambient_color: LinearRgba,
-    pub specular_color: LinearRgba,
+    pub ambient_sky_color: LinearRgba,
+    pub ambient_ground_color: LinearRgba,
 }
 
 /// The buffer containing the [`GlobalsUniform`]

@@ -10,12 +10,7 @@ struct Globals {
     // It wraps to zero when it reaches the maximum value of a u32.
     frame_count: u32,
 
-    shadow_color: vec4<f32>,
-    shadow_dir: vec3<f32>,
-    shadow_mult: vec2<f32>,
-
     light_color: vec4<f32>,
-    secondary_light_color: vec4<f32>,
-    ambient_color: vec4<f32>,
-    specular_color: vec4<f32>,
+    ambient_sky_color: vec4<f32>,
+    ambient_ground_color: vec4<f32>,
 };

@@ -566,7 +566,11 @@ pub struct GpuCulling;
 pub struct NoCpuCulling;
 
 impl ViewTarget {
+    #[cfg(any(target_os = "android", target_os = "ios"))]
     pub const TEXTURE_FORMAT_HDR: TextureFormat = TextureFormat::Rg11b10Ufloat;
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    pub const TEXTURE_FORMAT_HDR: TextureFormat = TextureFormat::Rgba32Float;
 
     /// Retrieve this target's main texture's color attachment.
     pub fn get_color_attachment(&self) -> RenderPassColorAttachment {

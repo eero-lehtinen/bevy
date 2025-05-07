@@ -194,13 +194,21 @@ pub enum Value {
 }
 
 impl Data {
-    fn path(&self) -> &Path {
+    pub(crate) fn path(&self) -> &Path {
         &self.path
     }
     fn value(&self) -> &[u8] {
         match &self.value {
             Value::Vec(vec) => vec,
             Value::Static(value) => value,
+        }
+    }
+
+    #[cfg(feature = "embedded_watcher")]
+    pub(crate) fn value_to_string(&self) -> alloc::string::String {
+        match &self.value {
+            Value::Vec(vec) => alloc::string::String::from_utf8_lossy(vec).into_owned(),
+            Value::Static(value) => alloc::string::String::from_utf8_lossy(value).into_owned(),
         }
     }
 }

@@ -425,7 +425,7 @@ impl Plugin for AssetPlugin {
             .add_systems(PreUpdate, handle_internal_asset_events.ambiguous_with_all())
             .register_type::<AssetPath>();
 
-        #[cfg(feature = "internal_watcher")]
+        #[cfg(feature = "embedded_watcher")]
         {
             use crate::io::embedded::internal_watcher::{update, InternalAssetWatcher};
             app.init_resource::<InternalAssetWatcher>()

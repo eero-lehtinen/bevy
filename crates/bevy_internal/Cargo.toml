@@ -218,9 +218,6 @@ file_watcher = ["bevy_asset?/file_watcher"]
 # Enables watching embedded files for Bevy Asset hot-reloading
 embedded_watcher = ["bevy_asset?/embedded_watcher"]
 
-# Enables watching Bevy internal assets for hot-reloading
-internal_watcher = ["bevy_asset?/internal_watcher"]
-
 # Enable system stepping support
 bevy_debug_stepping = [
   "bevy_ecs/bevy_debug_stepping",

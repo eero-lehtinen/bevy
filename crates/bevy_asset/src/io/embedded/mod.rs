@@ -4,7 +4,7 @@ mod embedded_watcher;
 #[cfg(feature = "embedded_watcher")]
 pub use embedded_watcher::*;
 
-#[cfg(feature = "internal_watcher")]
+#[cfg(feature = "embedded_watcher")]
 pub mod internal_watcher;
 
 use crate::io::{
@@ -286,41 +286,48 @@ pub fn watched_path(_source_file_path: &'static str, _asset_path: &'static str) 
 }
 
 #[macro_export]
-#[cfg(feature = "internal_watcher")]
+#[cfg(feature = "embedded_watcher")]
 macro_rules! apply_internal_watcher {
-    ($app: ident, $handle: expr, $path: expr, $loader: expr) => {{
+    ($app: ident, $handle: expr, $embedded_path: expr, $path_str: expr, $loader: expr) => {{
+        let watched_path = $crate::io::embedded::watched_path(file!(), $path_str);
+
         let handle_id = $handle.id();
         let updater = move |world: &mut ::bevy_ecs::world::World,
-                            contents: ::std::string::String,
-                            path: ::std::borrow::Cow<'_, str>| {
+                            path: ::std::string::String,
+                            content: ::std::string::String| {
             let mut assets = world.resource_mut::<$crate::Assets<_>>();
-            assets.insert(handle_id, ($loader)(contents, path));
+            assets.insert(handle_id, ($loader)(content, path));
         };
 
         $app.world_mut()
             .resource_mut::<$crate::io::embedded::internal_watcher::InternalAssetWatcher>()
-            .add($path.clone(), ::std::boxed::Box::new(updater));
+            .insert(
+                watched_path,
+                &$embedded_path,
+                include_bytes!($path_str),
+                ::std::boxed::Box::new(updater),
+            );
     }};
 }
 
 #[macro_export]
-#[cfg(not(feature = "internal_watcher"))]
+#[cfg(not(feature = "embedded_watcher"))]
 macro_rules! apply_internal_watcher {
-    ($app: ident, $handle: expr, $path: expr, $loader: expr) => {{}};
+    ($app: ident, $handle: expr, $embedded_path: expr, $path_str: expr, $loader: expr) => {{}};
 }
 
 /// Loads an "internal" asset by embedding the string stored in the given `path_str` and associates it with the given handle.
 #[macro_export]
 macro_rules! load_internal_asset {
     ($app: ident, $handle: expr, $path_str: expr, $loader: expr) => {{
-        let path = $crate::io::embedded::watched_path(file!(), $path_str);
+        let embedded_path = $crate::embedded_path!("src", $path_str);
 
-        $crate::apply_internal_watcher!($app, $handle, path, $loader);
+        $crate::apply_internal_watcher!($app, $handle, embedded_path, $path_str, $loader);
 
         let mut assets = $app.world_mut().resource_mut::<$crate::Assets<_>>();
         assets.insert($handle.id(), ($loader)(
             include_str!($path_str),
-            path.to_string_lossy(),
+            embedded_path.to_string_lossy(),
         ));
     }};
     // we can't support params without variadic arguments, so internal assets with additional params can't be hot-reloaded

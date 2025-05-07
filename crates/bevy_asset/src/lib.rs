@@ -427,9 +427,9 @@ impl Plugin for AssetPlugin {
 
         #[cfg(feature = "embedded_watcher")]
         {
-            use crate::io::embedded::internal_watcher::{update, InternalAssetWatcher};
-            app.init_resource::<InternalAssetWatcher>()
-                .add_systems(PreUpdate, update);
+            use crate::io::embedded::internal_watcher;
+            app.init_resource::<internal_watcher::InternalStringWatcher>()
+                .add_systems(PreUpdate, internal_watcher::update);
         }
     }
 }

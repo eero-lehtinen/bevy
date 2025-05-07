@@ -1,23 +1,28 @@
-use crate::io::{memory::Value, AssetSourceEvent};
+use crate::io::AssetSourceEvent;
 use alloc::{borrow::ToOwned, boxed::Box, string::String, sync::Arc};
-use bevy_ecs::{resource::Resource, world::World};
+use bevy_ecs::{
+    resource::Resource,
+    world::{Mut, World},
+};
 use bevy_platform::collections::HashMap;
-use parking_lot::RwLock;
 use std::path::{Path, PathBuf};
 
 use super::{EmbeddedAssetRegistry, EmbeddedWatcher};
 
-type AssetUpdateFn = dyn Fn(&mut World, String, String) + Send + Sync;
-
+/// Bypasses the [`AssetServer`] and allows us to hot-reload embedded strings directly with an
+/// arbitrary update function.
 #[derive(Resource)]
-pub struct InternalAssetWatcher {
+pub struct InternalStringWatcher {
     registry: EmbeddedAssetRegistry,
+    update_functions: HashMap<PathBuf, Arc<AssetUpdateFn>>,
     receiver: crossbeam_channel::Receiver<AssetSourceEvent>,
-    asset_updaters: Arc<RwLock<HashMap<PathBuf, Arc<AssetUpdateFn>>>>,
     _watcher: EmbeddedWatcher,
 }
 
-impl Default for InternalAssetWatcher {
+/// Takes world, asset path, and asset string value as arguments.
+type AssetUpdateFn = dyn Fn(&mut World, String, String) + Send + Sync;
+
+impl Default for InternalStringWatcher {
     fn default() -> Self {
         let registry = EmbeddedAssetRegistry::default();
         let (sender, receiver) = crossbeam_channel::unbounded();
@@ -29,52 +34,47 @@ impl Default for InternalAssetWatcher {
         );
         Self {
             registry,
+            update_functions: Default::default(),
             receiver,
-            asset_updaters: Default::default(),
             _watcher: watcher,
         }
     }
 }
 
-impl InternalAssetWatcher {
-    pub fn get_changed(&self) -> Option<(String, String, Arc<AssetUpdateFn>)> {
+impl InternalStringWatcher {
+    pub fn watch_path(
+        &mut self,
+        full_path: PathBuf,
+        asset_path: &Path,
+        updater: Box<AssetUpdateFn>,
+    ) {
+        // The value can be empty for now as we are only watching for future changes.
+        self.registry.insert_asset(full_path, asset_path, &[]);
+        self.update_functions
+            .insert(asset_path.to_owned(), updater.into());
+    }
+
+    fn update(&self, world: &mut World) {
         let iter = self.receiver.try_iter();
         for event in iter {
             if let AssetSourceEvent::ModifiedAsset(path) = event {
-                if let Some(updater) = self.asset_updaters.read().get(&path).cloned() {
+                if let Some(update_fn) = self.update_functions.get(&path).cloned() {
                     if let Some(data) = self.registry.dir.get_asset(&path) {
-                        return Some((
+                        update_fn(
+                            world,
                             data.path().to_string_lossy().into_owned(),
                             data.value_to_string(),
-                            updater,
-                        ));
+                        );
                     }
                 }
             }
         }
-        None
-    }
-
-    pub fn insert(
-        &self,
-        full_path: PathBuf,
-        asset_path: &Path,
-        value: impl Into<Value>,
-        updater: Box<AssetUpdateFn>,
-    ) {
-        self.registry.insert_asset(full_path, asset_path, value);
-        self.asset_updaters
-            .write()
-            .insert(asset_path.to_owned(), updater.into());
     }
 }
 
+/// Run the update function for all modified internal string assets.
 pub fn update(world: &mut World) {
-    loop {
-        let Some((path, content, updater)) = world.resource::<InternalAssetWatcher>().get_changed()
-        else {
-            break;
-        };
-        updater(world, path, content);
-    }
+    world.resource_scope(|world, watcher: Mut<InternalStringWatcher>| {
+        watcher.update(world);
+    });
 }

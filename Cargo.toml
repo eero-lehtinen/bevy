@@ -495,6 +495,9 @@ file_watcher = ["bevy_internal/file_watcher"]
 # Enables watching in memory asset providers for Bevy Asset hot-reloading
 embedded_watcher = ["bevy_internal/embedded_watcher"]
 
+# Enables watching Bevy internal assets for hot-reloading
+internal_watcher = ["bevy_internal/internal_watcher"]
+
 # Enable stepping-based debugging of Bevy systems
 bevy_debug_stepping = ["bevy_internal/bevy_debug_stepping"]
 

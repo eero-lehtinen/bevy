@@ -424,6 +424,13 @@ impl Plugin for AssetPlugin {
             // needs to be robust to stochastic delays anyways.
             .add_systems(PreUpdate, handle_internal_asset_events.ambiguous_with_all())
             .register_type::<AssetPath>();
+
+        #[cfg(feature = "internal_watcher")]
+        {
+            use crate::io::embedded::internal_watcher::{update, InternalAssetWatcher};
+            app.init_resource::<InternalAssetWatcher>()
+                .add_systems(PreUpdate, update);
+        }
     }
 }
 

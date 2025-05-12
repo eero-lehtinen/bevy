@@ -2445,7 +2445,7 @@ impl BorderRadius {
             Val::VMin(percent) => viewport_size.min_element() * percent / 100.,
             Val::VMax(percent) => viewport_size.max_element() * percent / 100.,
         }
-        .clamp(0., 0.5 * node_size.min_element())
+        .clamp(0., 0.5 * node_size.min_element().max(0.))
     }
 
     /// Resolve the border radii for the corners from the given context values.

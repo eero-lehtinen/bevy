@@ -25,12 +25,14 @@ pub struct RayMeshHit {
 /// Hit data for an intersection between a ray and a triangle.
 #[derive(Default, Debug)]
 pub struct RayTriangleHit {
+    /// a
     pub distance: f32,
+    /// b
     pub barycentric_coords: (f32, f32),
 }
 
 /// Casts a ray on a mesh, and returns the intersection.
-pub(super) fn ray_intersection_over_mesh(
+pub fn ray_intersection_over_mesh(
     mesh: &Mesh,
     transform: &Mat4,
     ray: Ray3d,

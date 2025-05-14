@@ -62,7 +62,7 @@ pub(crate) const CLUSTERED_DECAL_SHADER_HANDLE: Handle<Shader> =
 /// This number is currently relatively low in order to work around the lack of
 /// first-class binding arrays in `wgpu`. When that feature is implemented, this
 /// limit can be increased.
-pub(crate) const MAX_VIEW_DECALS: usize = 8;
+pub(crate) const MAX_VIEW_DECALS: usize = 16;
 
 /// A plugin that adds support for clustered decals.
 ///

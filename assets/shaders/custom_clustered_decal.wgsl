@@ -48,6 +48,8 @@ fn fragment(
             0.0
         );
 
+        // decal_base_color *= decal_iterator.color;
+
         switch (decal_iterator.tag) {
             case 1u: {
                 // Tint with red.

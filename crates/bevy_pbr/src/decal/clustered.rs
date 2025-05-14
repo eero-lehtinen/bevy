@@ -18,6 +18,7 @@ use core::{num::NonZero, ops::Deref};
 
 use bevy_app::{App, Plugin};
 use bevy_asset::{load_internal_asset, weak_handle, AssetId, Handle};
+use bevy_color::LinearRgba;
 use bevy_derive::{Deref, DerefMut};
 use bevy_ecs::{
     component::Component,
@@ -90,6 +91,9 @@ pub struct ClusteredDecal {
     /// blended with the underlying surface and/or other decals. All decal
     /// images in the scene must use the same sampler.
     pub image: Handle<Image>,
+
+    /// The color of the decal.
+    pub color: LinearRgba,
 
     /// An application-specific tag you can use for any purpose you want.
     ///
@@ -189,6 +193,8 @@ pub struct RenderClusteredDecal {
     /// The shader uses this in order to back-transform world positions into
     /// model space.
     local_from_world: Mat4,
+    // Color
+    color: LinearRgba,
     /// The index of the decal texture in the binding array.
     image_index: u32,
     /// A custom tag available for application-defined purposes.
@@ -232,6 +238,7 @@ pub fn extract_decals(
 
         render_decals.decals.push(RenderClusteredDecal {
             local_from_world: global_transform.affine().inverse().into(),
+            color: clustered_decal.color,
             image_index,
             tag: clustered_decal.tag,
             pad_a: 0,

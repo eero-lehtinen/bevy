@@ -225,6 +225,7 @@ fn spawn_decals(commands: &mut Commands, asset_server: &AssetServer) {
         ClusteredDecal {
             image: image.clone(),
             // Tint with red.
+            color: Srgba::BLACK.into(),
             tag: 1,
         },
         calculate_initial_decal_transform(vec3(1.0, 3.0, 5.0), Vec3::ZERO, Vec2::splat(1.1)),
@@ -235,6 +236,7 @@ fn spawn_decals(commands: &mut Commands, asset_server: &AssetServer) {
         ClusteredDecal {
             image: image.clone(),
             // Tint with blue.
+            color: Srgba::BLUE.into(),
             tag: 2,
         },
         calculate_initial_decal_transform(vec3(-2.0, -1.0, 4.0), Vec3::ZERO, Vec2::splat(2.0)),

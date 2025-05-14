@@ -44,6 +44,8 @@ struct ClusteredDecalIterator {
     // A custom tag you can use for your own purposes.
     tag: u32,
 
+    color: vec4<f32>,
+
     // Private fields follow:
     // The current offset of the index in the `ClusterableObjectIndexRanges` list.
     decal_index_offset: i32,
@@ -74,6 +76,7 @@ fn clustered_decal_iterator_new(
         -1,
         vec2(0.0),
         0u,
+        vec4f(1.0),
         // We subtract 1 because the first thing `decal_iterator_next` does is
         // add 1.
         i32((*clusterable_object_index_ranges).first_decal_offset) - 1,
@@ -108,6 +111,8 @@ fn clustered_decal_iterator_next(iterator: ptr<function, ClusteredDecalIterator>
             (*iterator).uv = decal_space_vector.xy * vec2(1.0, -1.0) + vec2(0.5);
             (*iterator).tag =
                 mesh_view_bindings::clustered_decals.decals[decal_index].tag;
+            (*iterator).color =
+                mesh_view_bindings::clustered_decals.decals[decal_index].color;
             return true;
         }
 

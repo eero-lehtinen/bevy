@@ -66,6 +66,11 @@ impl<S: System<In = ()>> System for InfallibleSystemWrapper<S> {
     }
 
     #[inline]
+    fn refresh_hotpatch(&mut self) {
+        self.0.refresh_hotpatch();
+    }
+
+    #[inline]
     fn apply_deferred(&mut self, world: &mut World) {
         self.0.apply_deferred(world);
     }
